@@ -1,10 +1,10 @@
 const httpHeaders = {
     headers: {
-        "Access-Control-Allow-Origin": "http://localhost:3000",
+        'Content-Type': 'application/fhir+xml',
     },
 };
 const HttpUtil = {
-    authHttpHeaders: httpHeaders,
+    httpHeaders,
 }
 
 export default HttpUtil;

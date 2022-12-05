@@ -2,7 +2,7 @@ import Axios from "axios";
 
 const instance = Axios.create({
     headers: {
-        "Access-Control-Allow-Origin": "http://localhost:3000"
+        'Content-Type': 'application/fhir+xml',
     },
     withCredentials: false,
     responseType: "json",
