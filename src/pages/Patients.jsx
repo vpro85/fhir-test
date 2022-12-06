@@ -30,18 +30,16 @@ const Patients = () => {
     }
 
     async function fetchPatientData(id) {
-        const entry = await projectApi.getPatient(id);
-        return entry
+        return await projectApi.getPatient(id)
     }
 
     const processPatientEntry = (id, patient) => {
-        const processedEntry = {
+        return {
             id,
-            name: patient?.name[0]?.text || `${patient.name[0].given.join(' ')} ${patient.name[0].family}`,
-            gender: patient.gender,
-            birthDate: patient.birthDate,
+            name: patient?.name[0]?.text || `${patient.name[0].given.join(' ')} ${patient.name[0].family}` || "Неизвестно",
+            gender: patient.gender || "Неизвестно",
+            birthDate: patient.birthDate || "Неизвестно",
         }
-        return processedEntry
     }
 
     async function makePatientsList() {
@@ -53,9 +51,21 @@ const Patients = () => {
             patientData = processPatientEntry(id, patientData);
             patientList.push(patientData)
         }
-        console.log("patientList", patientList)
         patientList.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
         setSortedPatientsList(patientList);
+        patientList.forEach(patient => {
+            patient.appointments = []
+            appointments.forEach((app) => {
+                app.resource.participant && app.resource.participant.forEach((val) => {
+                    if (val.actor?.reference) {
+                        if(Number(val.actor.reference.slice(8)) === patient.id) {
+                            patient.appointments.push(app);
+                        }
+                    }
+                })
+            })
+        })
+
         return patientList;
     }
 
