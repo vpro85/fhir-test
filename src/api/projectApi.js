@@ -6,8 +6,11 @@ import HttpUtil from "../utils/httpUtils";
 export const projectApi = {
     getAppointments: async (count = 10) => {
         try {
-            const response = await axios.get(config.API_URL + ENUMS.API_ROUTES.APPOINTMENTS_GET + `?_count=${count}`, {
+            const response = await axios.get(config.API_URL + ENUMS.API_ROUTES.APPOINTMENTS_GET, {
                 ...HttpUtil.httpHeaders,
+                params: {
+                    _count: count
+                }
             })
             if (response.status === 200) return response.data;
             throw new Error(`Response status code ${response.status}`);
