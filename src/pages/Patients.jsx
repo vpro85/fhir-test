@@ -1,71 +1,16 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {AppContext} from "../context";
+import React, {useEffect, useState} from 'react';
 import {projectApi} from "../api/projectApi";
 import PatientsList from "../components/patientsList";
 
 const Patients = () => {
-    const {isLoading} = useContext(AppContext)
-    const [appointments, setAppointments] = useState([])
-    const [patientIds, setPatientIds] = useState([])
-    const [patientData, setPatientData] = useState([])
-    const [isDataReceived, setIsDataReceived] = useState(false);
+    const [sortedPatientsList, setSortedPatientsList] = useState([])
 
     async function fetchAppointmentsData() {
-
         const {entry} = await projectApi.getAppointments();
-        setAppointments(entry)
+        return entry;
     }
 
-    const processPatientEntry = (patient) => {
-        console.log("processPatientEntry:::patient", patient)
-        debugger
-        const processedEntry = {
-            id: isNaN(patient.id) ? 999 : Number(patient.id),
-            // TODO: process name
-            name: patient?.name[0]?.text || "Unknown"
-        }
-        console.log("processPatientEntry:::processed patient", processedEntry)
-        return processedEntry
-    }
-
-    async function fetchPatient(id) {
-        console.log("fetchPatient:::start")
-        const entry = await projectApi.getPatient(id);
-        const processedEntry = processPatientEntry(entry)
-        console.log("fetchPatient:::entry", entry)
-        console.log("fetchPatient:::processedEntry", processedEntry)
-        console.log("fetchPatient:::end")
-        return processedEntry
-    }
-
-    useEffect(() => {
-        console.log("useEffect:::[]:::start")
-        fetchAppointmentsData();
-        console.log("useEffect:::[]:::end")
-    }, [])
-
-    useEffect(() => {
-        console.log("useEffect:::patientIds:::start")
-        if (patientIds.length > 0) {
-            setIsDataReceived(false)
-            const pData = [];
-            patientIds.forEach((pid) => {
-                fetchPatient(pid).then(data => {
-                    console.log("data", data)
-                    pData.push(data)
-                    console.log("useEffect:::patientIds:::pData", pData)
-                    setPatientData(pData);
-                });
-            });
-            setIsDataReceived(true);
-
-
-            console.log("useEffect:::patientIds:::end")
-        }
-    }, [patientIds])
-
-    useEffect(() => {
-        console.log("useEffect:::appointments:::start")
+    function getPatientIds(appointments) {
         const patients = []
         if (appointments.length > 0) {
             appointments.forEach((data) => {
@@ -73,28 +18,54 @@ const Patients = () => {
                 participant && participant.forEach((data) => {
                     const reference = data?.actor?.reference;
                     if (reference && reference.includes("Patient")) {
-                        patients.push(reference.slice(8))
+                        const id = reference.slice(8)
+                        !isNaN(id) && patients.push(Number(id))
                     }
                 })
             })
         }
-        const patientsList = []
-        new Set(patients).forEach(p => patientsList.push(p))
-        setPatientIds(patientsList)
-        console.log("useEffect:::appointments:::end")
-    }, [appointments])
+        const patientsList = [];
+        new Set(patients).forEach(p => patientsList.push(p));
+        return patientsList;
+    }
 
-    useEffect(()=>{
-        console.log("useEffect:::patientData:::start")
-        console.log("useEffect:::patientData", patientData)
-        console.log("useEffect:::patientData:::end")
+    async function fetchPatientData(id) {
+        const entry = await projectApi.getPatient(id);
+        return entry
+    }
 
-    }, [patientData])
+    const processPatientEntry = (id, patient) => {
+        const processedEntry = {
+            id,
+            name: patient?.name[0]?.text || `${patient.name[0].given.join(' ')} ${patient.name[0].family}`,
+            gender: patient.gender,
+            birthDate: patient.birthDate,
+        }
+        return processedEntry
+    }
 
+    async function makePatientsList() {
+        const appointments = await fetchAppointmentsData();
+        const patientIds = getPatientIds(appointments);
+        const patientList = [];
+        for (const id of patientIds) {
+            let patientData = await fetchPatientData(id);
+            patientData = processPatientEntry(id, patientData);
+            patientList.push(patientData)
+        }
+        console.log("patientList", patientList)
+        patientList.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+        setSortedPatientsList(patientList);
+        return patientList;
+    }
+
+    useEffect(() => {
+        makePatientsList();
+    }, [])
 
     return (
         <div>
-            <PatientsList sortedPatientsList={patientData}/>
+            <PatientsList sortedPatientsList={sortedPatientsList}/>
         </div>
     );
 };
