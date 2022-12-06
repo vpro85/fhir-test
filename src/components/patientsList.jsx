@@ -8,7 +8,7 @@ const PatientsList = ({sortedPatientsList}) => {
             </h1>
             <div>
                 {sortedPatientsList.map(p =>
-                    <div style={{margin: "5px"}}>
+                    <div style={{margin: "5px"}} key={p}>
                         <Card size="small" title="Small size card" extra={<a href="#">More</a>} style={{ width: 300 }}>
                             <p>Patient ID: {p}</p>
                             <p>имя пациента - `Patient.name[0].text`. Если поле текст отсутствует, то собрать имя конкатенацией `Patient.name[0].family` и `Patient.name[0].given`;</p>
