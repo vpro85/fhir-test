@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {AppContext} from "../context";
 import {projectApi} from "../api/projectApi";
+import PatientsList from "../components/patientsList";
 
 const Patients = () => {
     const {isLoading} = useContext(AppContext)
@@ -42,8 +43,7 @@ const Patients = () => {
 
     return (
         <div>
-            <h1>Patients List</h1>
-            {patientIds.map((p) => <div>{p}</div>)}
+            <PatientsList sortedPatientsList={patientIds} />
         </div>
     );
 };
