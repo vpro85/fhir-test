@@ -1,9 +1,9 @@
-import logo from '../logo.svg';
-import '../App.css';
-import {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from 'react';
+import {AppContext} from "../context";
 import {projectApi} from "../api/projectApi";
 
-export default function App() {
+const Patients = () => {
+    const {isLoading} = useContext(AppContext)
     const [appointments, setAppointments] = useState([])
     const [patientIds, setPatientIds] = useState([])
 
@@ -38,15 +38,14 @@ export default function App() {
         setPatientIds(patientsList)
     }, [appointments])
 
-    return (
-        <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo"/>
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-                </p>
 
-            </header>
+
+    return (
+        <div>
+            <h1>Patients List</h1>
+            {patientIds.map((p) => <div>{p}</div>)}
         </div>
     );
-}
+};
+
+export default Patients;
