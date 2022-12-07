@@ -58,7 +58,7 @@ const Patients = () => {
             appointments.forEach((app) => {
                 app.resource.participant && app.resource.participant.forEach((val) => {
                     if (val.actor?.reference) {
-                        if(Number(val.actor.reference.slice(8)) === patient.id) {
+                        if(val.actor.reference.includes("Patient") && Number(val.actor.reference.slice(8)) === patient.id) {
                             patient.appointments.push(app);
                         }
                     }
